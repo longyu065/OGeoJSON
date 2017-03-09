@@ -28,7 +28,7 @@ public class GeoJSONConverUtil {
 	/**
 	 * @param coordinate 坐标串 116.364433,39.9678116;116.361763,39.9677925;
 	 * @param type type 坐标类型 支持Polygon;Point;LineString;
-	 * @param properties
+	 * @param properties map类型
 	 * @return  返回GeoJSON 字符串 形式 {"geometry":{"coordinates":[[116.364433,39.9678116],[116.361763,39.9677925]],"type":"LineString"},"type":"Feature"}
 	 */
 	public static String getFeatureJSON(String coordinate, String type,Map<String, Object> properties) {

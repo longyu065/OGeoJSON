@@ -33,6 +33,7 @@ public class GeoTest {
 		tlist.add("Polygon");
 		
 		String feacolle=GeoJSONConverUtil.getFeatureCollectionJSON(clist,tlist);
+		System.out.println(feacolle);
 	}
 	@Test
 	public void testGetFeatureColletionWithProperties(){
@@ -49,7 +50,7 @@ public class GeoTest {
 		plist.add(map);
 		plist.add(null);
 		String feacolle=GeoJSONConverUtil.getFeatureCollectionJSON(clist,tlist,plist);
-		System.out.println(feacolle);
+	//	System.out.println(feacolle);
 		
 	}
 	
