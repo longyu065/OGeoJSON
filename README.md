@@ -11,6 +11,11 @@ List<String> clist=new ArrayList<String>();
 				tlist.add("Polygon");
 		String feacolle=GeoJSONConverUtil.getFeatureCollectionJSON(clist,tlist);
 ``` 
+####返回结果
+```
+{"features":[{"geometry":{"coordinates":[[116.364433,39.9678116],[116.361763,39.9677925]],"type":"LineString"},"type":"Feature"},{"geometry":{"coordinates":[[[116.364433,39.9678116],[116.361763,39.9677925],[116.361763,39.9607925],[116.361763,39.960925],[116.364433,39.9678116]]],"type":"Polygon"},"type":"Feature"}],"type":"FeatureCollection"}
+
+```
 ##带属性数据
 ```
 List<String> clist=new ArrayList<String>();
@@ -30,7 +35,7 @@ List<String> clist=new ArrayList<String>();
 		
 
 ```
-###返回结果
+####返回结果
 ``` 
 {"features":[{"geometry":{"coordinates":[[116.364433,39.9678116],[116.361763,39.9677925]],"type":"LineString"},"type":"Feature","properties":{"p1":"dd","p2":"ddd"}},{"geometry":{"coordinates":[[[116.364433,39.9678116],[116.361763,39.9677925],[116.361763,39.9607925],[116.361763,39.960925],[116.364433,39.9678116]]],"type":"Polygon"},"type":"Feature"}],"type":"FeatureCollection"}
 ```
