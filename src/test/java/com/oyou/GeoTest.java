@@ -53,5 +53,16 @@ public class GeoTest {
 	//	System.out.println(feacolle);
 		
 	}
+	@Test
+	public void testGetFeatureColletionPoint(){
+		String geometry=GeoJSONConverUtil.getFeatureJSON("116.364433,39.9678116;116.361763,39.9677925;", "Point",null);
+		String geometry2=GeoJSONConverUtil.getFeatureJSON("116.364733,39.9678116;", "MultiPoint",null);
+		
+		List list=new ArrayList<Object>();
+		list.add(geometry);
+		list.add(geometry2);
+		String feacolle=GeoJSONConverUtil.getFeatureCollectionJSON(list);
+		System.out.println(feacolle);
+	}
 	
 }
