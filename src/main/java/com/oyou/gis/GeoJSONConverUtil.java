@@ -38,10 +38,13 @@ public class GeoJSONConverUtil {
 	 * <p><span>Point</span>116.364433,39.9678116;</p>
 	 * <p><span>MutilPoint</span>116.361763,39.9677925;</p>
 	 * <p><span>LineString</span>116.364433,39.9678116;116.361763,39.9677925;</p>
-	 * <p><span>MutilLineString</span>116.3,39.9;116.4,39.9;116.4,39.7;116.3,39.7;116.3,39.9&116.31,39.89;116.37,39.89;116.37,39.76;116.31,39.76;116.31,39.89</p>
-	 * <p><span>Polygon</span>
+	 * <p><span>MutilLineString</span> 使用 & 分割<br>116.3,39.9;116.4,39.9;116.4,39.7;116.3,39.7;116.3,39.9&116.31,39.89;116.37,39.89;116.37,39.76;116.31,39.76;116.31,39.89</p>
+	 * <p><span>Polygon</span> & 分割外环内环<br>
 	 * 116.3,39.9;116.4,39.9;116.4,39.7;116.3,39.7;116.3,39.9&116.31,39.89;116.37,39.89;116.37,39.76;116.31,39.76;116.31,39.89
-	 * <br>& 前为外环后其余皆为内环空
+	 * </p>
+	 *  <p><span>MultiPolygon</span> Polygon的集合 使用#作为Polygon分隔符<br>
+	 * 116.3,39.9;116.4,39.9;116.4,39.7;116.3,39.7;116.3,39.9&116.31,39.89;116.37,39.89;116.37,39.76;116.31,39.76;116.31,39.89#116.3,39.9;116.4,39.9;116.4,39.7;116.3,39.7;116.3,39.9&116.31,39.89;116.37,39.89;116.37,39.76;116.31,39.76;116.31,39.89
+	 * 
 	 * </p>
 	 * @return  返回GeoJSON 字符串 形式 {"geometry":{"coordinates":[[116.364433,39.9678116],[116.361763,39.9677925]],"type":"LineString"},"type":"Feature"}
 	 */
@@ -54,12 +57,15 @@ public class GeoJSONConverUtil {
 	 * <p><span>Point</span>116.364433,39.9678116;</p>
 	 * <p><span>MutilPoint</span>116.361763,39.9677925;</p>
 	 * <p><span>LineString</span>116.364433,39.9678116;116.361763,39.9677925;</p>
-	 * <p><span>MutilLineString</span>116.3,39.9;116.4,39.9;116.4,39.7;116.3,39.7;116.3,39.9&116.31,39.89;116.37,39.89;116.37,39.76;116.31,39.76;116.31,39.89</p>
-	 * <p><span>Polygon</span>
+	 * <p><span>MutilLineString</span> 使用 & 分割<br>116.3,39.9;116.4,39.9;116.4,39.7;116.3,39.7;116.3,39.9&116.31,39.89;116.37,39.89;116.37,39.76;116.31,39.76;116.31,39.89</p>
+	 * <p><span>Polygon</span> & 分割外环内环<br>
 	 * 116.3,39.9;116.4,39.9;116.4,39.7;116.3,39.7;116.3,39.9&116.31,39.89;116.37,39.89;116.37,39.76;116.31,39.76;116.31,39.89
-	 * <br>& 前为外环后其余皆为内环空
 	 * </p>
-	 * @param properties map类型
+	 *  <p><span>MultiPolygon</span> Polygon的集合 使用#作为Polygon分隔符<br>
+	 * 116.3,39.9;116.4,39.9;116.4,39.7;116.3,39.7;116.3,39.9&116.31,39.89;116.37,39.89;116.37,39.76;116.31,39.76;116.31,39.89#116.3,39.9;116.4,39.9;116.4,39.7;116.3,39.7;116.3,39.9&116.31,39.89;116.37,39.89;116.37,39.76;116.31,39.76;116.31,39.89
+	 * 
+	 * </p>
+	 * @param properties 
 	 * @return  返回GeoJSON 字符串 形式 {"geometry":{"coordinates":[[116.364433,39.9678116],[116.361763,39.9677925]],"type":"LineString"},"type":"Feature"}
 	 */
 	public static String getFeatureJSON(String coordinates, String type,Map<String, Object> properties) {
@@ -173,8 +179,28 @@ public class GeoJSONConverUtil {
 		return jsonObject.toJSONString();
 	}
 	/**
+	 * @param name GeoJson的name
 	 * @param features 单个geojson类型String的集合
-	 * @return featureCollection
+	 * @return { "type": "FeatureCollection",
+  "features": [
+    { "type": "Feature",
+      "geometry": {"type": "Point", "coordinates": [102.0, 0.5]},
+      "properties": {"prop0": "value0"}
+      },
+    { "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [102.0, 0.0], [103.0, 1.0], [104.0, 0.0], [105.0, 1.0]
+          ]
+        },
+      "properties": {
+        "prop0": "value0",
+        "prop1": 0.0
+        }
+      }
+     ]
+   }
 	 */
 	public static String getFeatureCollectionJSON(String name,List<String> features){
 		if (features==null||features.size()==0) {
@@ -196,18 +222,58 @@ public class GeoJSONConverUtil {
 		return geoJSON.toJSONString();
 	}
 	/**
+	 * @param name GeoJson的name
 	 * @param coordinate
 	 * @param type
-	 * @return
+	 * @return { "type": "FeatureCollection",
+  "features": [
+    { "type": "Feature",
+      "geometry": {"type": "Point", "coordinates": [102.0, 0.5]},
+      "properties": {"prop0": "value0"}
+      },
+    { "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [102.0, 0.0], [103.0, 1.0], [104.0, 0.0], [105.0, 1.0]
+          ]
+        },
+      "properties": {
+        "prop0": "value0",
+        "prop1": 0.0
+        }
+      }
+     ]
+   }
 	 */
 	public static String getFeatureCollectionJSON(String name,List<String> coordinates, List<String> types){
 		return getFeatureCollectionJSON(name,coordinates, types,null);
 	}
 	/**
+	 * @param name GeoJson的name
 	 * @param coordinate  坐标串 116.364433,39.9678116;116.361763,39.9677925;
 	 * @param type
 	 * @param properties
-	 * @return
+	 * @return { "type": "FeatureCollection",
+  "features": [
+    { "type": "Feature",
+      "geometry": {"type": "Point", "coordinates": [102.0, 0.5]},
+      "properties": {"prop0": "value0"}
+      },
+    { "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [102.0, 0.0], [103.0, 1.0], [104.0, 0.0], [105.0, 1.0]
+          ]
+        },
+      "properties": {
+        "prop0": "value0",
+        "prop1": 0.0
+        }
+      }
+     ]
+   }
 	 */
 	public static String getFeatureCollectionJSON(String name,List<String> coordinates, List<String> types,List<Map<String, Object>> properties){
 		
@@ -242,10 +308,7 @@ public class GeoJSONConverUtil {
 	private static JSONArray converCoordinateTOJSONArray(String position){
 		return converCoordinateTOJSONArray(position,null);
 	}
-	/**
-	 * @param position  
-	 * @return JSONArray
-	 */
+
 	/**
 	 * @param position  example: 116.364433,39.9678116
 	 * @param regex the default regex is dot <i>","</i>

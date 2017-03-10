@@ -1,4 +1,4 @@
-package com.oyou;
+package com.oyou.gis;
 
 import static org.junit.Assert.*;
 
@@ -11,6 +11,10 @@ import org.junit.Test;
 
 import com.oyou.gis.GeoJSONConverUtil;
 
+/**
+ * @author tkrui
+ *
+ */
 public class GeoTest {
 
 	@Test(expected=IllegalArgumentException.class)
