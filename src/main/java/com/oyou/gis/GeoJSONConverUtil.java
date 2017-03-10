@@ -1,4 +1,4 @@
-package com.oyou;
+package com.oyou.gis;
 
 
 import java.math.BigDecimal;
@@ -23,18 +23,27 @@ public class GeoJSONConverUtil {
 		String geometry2=getFeatureJSON("116.364433,39.9678116;116.361763,39.9677925", "LineString");
 //		String geometry2=getFeatureJSON("116.364733,39.9678116;", "MultiPoint",null);
 //		String geometry3=getFeatureJSON("116. 3,39.9;116.4,39.9;116.4,39.7;116.3,39.7;116.3,39.9&116.31,39.89;116.37,39.89;116.37,39.76;116.31,39.76;116.31,39.89", "Polygon",null);
-		String geometry4=getFeatureJSON("116.3,39.9;116.4,39.9;116.4,39.7;116.3,39.7;116.3,39.9&116.31,39.89;116.37,39.89;116.37,39.76;116.31,39.76;116.31,39.89", "MultiLineString",null);
+		String geometry4=getFeatureJSON("116.3,39.9;116.4,39.9;116.4,39.7;116.3,39.7;116.3,39.9", "MultiLineString",null);
+		String geometry5=getFeatureJSON("116.3,39.9;116.4,39.9;116.4,39.7;116.3,39.7;116.3,39.9", "Polygon",null);
 		
 		List list=new ArrayList<Object>();
 
-		list.add(geometry4);
-		String feacolle=getFeatureCollectionJSON(list);
+		list.add(geometry5);
+		String feacolle=getFeatureCollectionJSON("dd",list);
 		System.out.println(feacolle);
 	}
 	/**
-	 * @param coordinates 坐标串 116.364433,39.9678116;116.361763,39.9677925;|
-	 * @param type 坐标类型 支持Polygon;Point;LineString;
-	 * @return 返回GeoJSON 字符串 形式 {"geometry":{"coordinates":[[116.364433,39.9678116],[116.361763,39.9677925]],"type":"LineString"},"type":"Feature"}
+	 * @param coordinates 坐标串 116.364433,39.9678116;116.361763,39.9677925;
+	 * @param type type 坐标类型 支持Polygon;Point;MultiPointLineString;
+	 * <p><span>Point</span>116.364433,39.9678116;</p>
+	 * <p><span>MutilPoint</span>116.361763,39.9677925;</p>
+	 * <p><span>LineString</span>116.364433,39.9678116;116.361763,39.9677925;</p>
+	 * <p><span>MutilLineString</span>116.3,39.9;116.4,39.9;116.4,39.7;116.3,39.7;116.3,39.9&116.31,39.89;116.37,39.89;116.37,39.76;116.31,39.76;116.31,39.89</p>
+	 * <p><span>Polygon</span>
+	 * 116.3,39.9;116.4,39.9;116.4,39.7;116.3,39.7;116.3,39.9&116.31,39.89;116.37,39.89;116.37,39.76;116.31,39.76;116.31,39.89
+	 * <br>& 前为外环后其余皆为内环空
+	 * </p>
+	 * @return  返回GeoJSON 字符串 形式 {"geometry":{"coordinates":[[116.364433,39.9678116],[116.361763,39.9677925]],"type":"LineString"},"type":"Feature"}
 	 */
 	public static String getFeatureJSON(String coordinates, String type){
 		return getFeatureJSON(coordinates,type,null);
@@ -69,7 +78,6 @@ public class GeoJSONConverUtil {
 			}
 			
 			String[] positions=coordinates.replaceAll("&","").split(";");
-			System.out.println(positions.length);
 			//判断coordinates 含有多个点自动转换为MultiPoint
 			if (positions.length>1) {
 				JSONArray multiPointArray=new JSONArray();
@@ -118,40 +126,62 @@ public class GeoJSONConverUtil {
 			}
 			
 			geometryJsonObject.put("coordinates",multiLineArray);
-		}else if (type.equals("Polygon")) {
-			String[] coordinate=coordinates.split("&");
+		}else if (type.equals("Polygon")||type.equals("MultiPolygon")) {
+			String[] multiPolygonCoordinate=coordinates.split("#");
 			
-			JSONArray polygonArray=new JSONArray();
-			for (String coordi : coordinate) {
-				JSONArray	positionsArray=new JSONArray();
-				String [] positions=coordi.toString().split(";");
+			if (multiPolygonCoordinate.length>1) {
+				type="MultiPolygon";
+				JSONArray multiPolygonArray=new JSONArray();
+				for (String polygoncoordi : multiPolygonCoordinate) {
+					multiPolygonArray.add((JSON.parseObject(GeoJSONConverUtil.getFeatureJSON(polygoncoordi, "Polygon")).getJSONObject("geometry")).getJSONArray("coordinates"));
+				}
+				geometryJsonObject.put("coordinates",multiPolygonArray);
+			}else {
+				type="Polygon";
+				String[] coordinate=coordinates.replace("#", "").split("&");
+				JSONArray polygonArray=new JSONArray();
+				for (String coordi : coordinate) {
+					if (coordi==null||coordi.equals("")) {
+						continue;
+					}
+					JSONArray	positionsArray=new JSONArray();
+					String [] positions=coordi.toString().split(";");
+				
+					if(positions.length<1){
+						continue;
+					}
 					for (String position : positions) {
 						positionsArray.add(converCoordinateTOJSONArray(position));
 					}
-				polygonArray.add(positionsArray);		
+					polygonArray.add(positionsArray);		
+				}
+				geometryJsonObject.put("coordinates",polygonArray);
 			}
-			geometryJsonObject.put("coordinates",polygonArray);
+			
+			
 		}else {
 			throw new IllegalArgumentException("type is not correct");
 		}
 		geometryJsonObject.put("type",type);
 		jsonObject.put("type", "Feature");
-		jsonObject.put("geometry", geometryJsonObject);
+		
 
 		if (properties!=null) {
 			jsonObject.put("properties",new JSONObject(properties));
 		}
+		jsonObject.put("geometry", geometryJsonObject);
 		return jsonObject.toJSONString();
 	}
 	/**
 	 * @param features 单个geojson类型String的集合
 	 * @return featureCollection
 	 */
-	public static String getFeatureCollectionJSON(List<String> features){
+	public static String getFeatureCollectionJSON(String name,List<String> features){
 		if (features==null||features.size()==0) {
 			throw new IllegalArgumentException("list must contain a value");
 		}
 		JSONObject geoJSON=new JSONObject(true);
+		geoJSON.put("name", name==null?"":name);
 		geoJSON.put("type", "FeatureCollection");
 		JSONArray featuresArray=new JSONArray();
 		for (String feature : features) {
@@ -170,8 +200,8 @@ public class GeoJSONConverUtil {
 	 * @param type
 	 * @return
 	 */
-	public static String getFeatureCollectionJSON(List<String> coordinates, List<String> types){
-		return getFeatureCollectionJSON(coordinates, types,null);
+	public static String getFeatureCollectionJSON(String name,List<String> coordinates, List<String> types){
+		return getFeatureCollectionJSON(name,coordinates, types,null);
 	}
 	/**
 	 * @param coordinate  坐标串 116.364433,39.9678116;116.361763,39.9677925;
@@ -179,7 +209,7 @@ public class GeoJSONConverUtil {
 	 * @param properties
 	 * @return
 	 */
-	public static String getFeatureCollectionJSON(List<String> coordinates, List<String> types,List<Map<String, Object>> properties){
+	public static String getFeatureCollectionJSON(String name,List<String> coordinates, List<String> types,List<Map<String, Object>> properties){
 		
 		if (coordinates==null||coordinates.size()==0||types==null||types.size()==0) {
 			throw new IllegalArgumentException("list must contain a value");
@@ -188,7 +218,8 @@ public class GeoJSONConverUtil {
 			throw new IllegalArgumentException("coordinate and type must have the same size");
 		}
 		
-		JSONObject geoJSON=new JSONObject();
+		JSONObject geoJSON=new JSONObject(true);
+		geoJSON.put("name", name==null?"":name);
 		geoJSON.put("type", "FeatureCollection");
 		JSONArray featuresArray=new JSONArray();
 		for (int i = 0; i < coordinates.size(); i++) {
@@ -237,9 +268,11 @@ public class GeoJSONConverUtil {
 		
 		JSONArray resultArray=new JSONArray();
 		try {
-			
-			resultArray.add(Double.valueOf(co[0]));
-			resultArray.add(Double.valueOf(co[1]));
+			BigDecimal bigDecimal0=new BigDecimal(co[0]);
+			BigDecimal bigDecimal1=new BigDecimal(co[1]);
+
+			resultArray.add(bigDecimal0);
+			resultArray.add(bigDecimal1);
 			
 		} catch (NumberFormatException e) {
 			throw new NumberFormatException("cant't parse lng,lat:"+position);

@@ -9,6 +9,8 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import com.oyou.gis.GeoJSONConverUtil;
+
 public class GeoTest {
 
 	@Test(expected=IllegalArgumentException.class)
@@ -32,7 +34,7 @@ public class GeoTest {
 		tlist.add("LineString");
 		tlist.add("Polygon");
 		
-		String feacolle=GeoJSONConverUtil.getFeatureCollectionJSON(clist,tlist);
+		String feacolle=GeoJSONConverUtil.getFeatureCollectionJSON("geojsonname",clist,tlist);
 		System.out.println(feacolle);
 	}
 	@Test
@@ -49,7 +51,7 @@ public class GeoTest {
 		map.put("p2", "ddd");
 		plist.add(map);
 		plist.add(null);
-		String feacolle=GeoJSONConverUtil.getFeatureCollectionJSON(clist,tlist,plist);
+		String feacolle=GeoJSONConverUtil.getFeatureCollectionJSON("geojsonname",clist,tlist);
 	//	System.out.println(feacolle);
 		
 	}
@@ -61,7 +63,7 @@ public class GeoTest {
 		List list=new ArrayList<Object>();
 		list.add(geometry);
 		list.add(geometry2);
-		String feacolle=GeoJSONConverUtil.getFeatureCollectionJSON(list);
+		String feacolle=GeoJSONConverUtil.getFeatureCollectionJSON("geojsonname",list);
 		System.out.println(feacolle);
 	}
 	
