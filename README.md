@@ -1,6 +1,6 @@
 第一次做开源，一个小的GeoJSON工具。欢迎各位提出建议，才能不断成长。  
 ###引用此包前需要使用引用fastjson.jar 详情可看pom.xml
-GeoJSONConverUtil 提供特定格式字符串转GeoJSON
+GeoJSONConverUtil 提供特定格式字符串转GeoJSON  
 ShapeUtil 提供esri shape文件转GeoJSON
 根据GeoJSON标准规范
 
